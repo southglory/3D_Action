@@ -1,7 +1,7 @@
 # 3D quaterView Action Game
 
 ## 참고
-유투브 골드메탈(https://youtu.be/WkMM7Uu2AoA)  
+유투브 골드메탈(https://youtube.com/playlist?list=PLO-mt5Iu5TeYkrBzWKuTCl6IUm_bA6BKy)  
 
 ## 따라하기 프로젝트 시작 계기
 액션게임에 필요한 키보드를 이용한 점프, 이동 구현 방법 등을 익히기 위해 시작.

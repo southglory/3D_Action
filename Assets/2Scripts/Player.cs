@@ -212,6 +212,7 @@ public class Player : MonoBehaviour
                     hasGrenades += item.value;
                     if (hasGrenades > maxHasGrenades)
                         hasGrenades = maxHasGrenades;
+
                     break;
             }
             Destroy(other.gameObject);
