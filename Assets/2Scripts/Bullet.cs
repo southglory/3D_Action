@@ -6,15 +6,26 @@ public class Bullet : MonoBehaviour
 {
     public int damage;
 
-    private void OnCollisionEnter(Collision collision)
+    private void Start()
     {
-        if (collision.gameObject.tag == "Floor")
-        {
-            Destroy(gameObject, 3);
-        }
-        else if (collision.gameObject.tag == "Wall")
-        {
-            Destroy(gameObject);
-        }
+        Destroy(gameObject, 3);
     }
+
+    //void OnCollisionEnter(Collision collision)
+    //{
+    //    Destroy(gameObject, 3);
+    //    //if (collision.gameObject.tag == "Floor")
+    //    //{
+            
+    //    //}
+    //}
+
+    //void OnTriggerEnter(Collider other)
+    //{
+    //    Destroy(gameObject, 3);
+    //    //if (other.gameObject.tag == "Wall")
+    //    //{
+            
+    //    //}
+    //}
 }
