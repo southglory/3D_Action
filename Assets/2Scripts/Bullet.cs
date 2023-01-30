@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,24 +9,23 @@ public class Bullet : MonoBehaviour
 
     private void Start()
     {
-        Destroy(gameObject, 3);
+        Destroy(gameObject, 6);
     }
 
-    //void OnCollisionEnter(Collision collision)
-    //{
-    //    Destroy(gameObject, 3);
-    //    //if (collision.gameObject.tag == "Floor")
-    //    //{
-            
-    //    //}
-    //}
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag == "Floor" && collision.gameObject.tag == "Wall")
+        {
+            Destroy(gameObject, 1f);
+        }
+    }
 
-    //void OnTriggerEnter(Collider other)
-    //{
-    //    Destroy(gameObject, 3);
-    //    //if (other.gameObject.tag == "Wall")
-    //    //{
-            
-    //    //}
-    //}
+    void OnTriggerEnter(Collider other)
+    {
+        //Destroy(gameObject);
+        if (other.gameObject.tag != "Item" && other.gameObject.tag != "Weapon")
+        {
+            Destroy(gameObject, 1);
+        }
+    }
 }

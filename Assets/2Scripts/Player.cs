@@ -5,7 +5,11 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    [Space(10f)]
+    [Header("Commons")]
+    [Tooltip("스피드")]
     public float speed;
+    [Tooltip("무기")]
     public GameObject[] weapons;
     public bool[] hasWeapons;
     public GameObject[] grenades;
@@ -43,13 +47,14 @@ public class Player : MonoBehaviour
     bool isFireReady = true;
     bool isBorder;
 
+    bool isDamage;
 
     Vector3 moveVec;
     Vector3 dodgeVec;
 
-
     Rigidbody rigid;
     Animator anim;
+    MeshRenderer[] meshs; // 팔다리 모두 가져옴.
 
     GameObject nearObject;
     Weapon equipWeapon;
@@ -62,6 +67,7 @@ public class Player : MonoBehaviour
     {
         rigid = GetComponent<Rigidbody>();
         anim = GetComponentInChildren<Animator>();
+        meshs = GetComponentsInChildren<MeshRenderer>();
     }
 
     // Update is called once per frame
@@ -291,7 +297,7 @@ public class Player : MonoBehaviour
     void StopToWall()
     {
         Debug.DrawRay(transform.position, transform.forward * 3, Color.green);
-        isBorder = Physics.Raycast(transform.position, transform.forward, 3, LayerMask.GetMask("Wall"));
+        isBorder = Physics.Raycast(transform.position, moveVec, 3, LayerMask.GetMask("Wall"));
     }
 
     void FixedUpdate()
@@ -341,6 +347,44 @@ public class Player : MonoBehaviour
             }
             Destroy(other.gameObject);
         }    
+        else if (other.tag == "EnemyCrash")
+        {
+            if (!isDamage)
+            {
+                Crash enemyCrash = other.GetComponent<Crash>();
+                health -= enemyCrash.damage;
+
+                StartCoroutine(OnDamage());
+            }
+        }
+        else if (other.tag == "EnemyBullet")
+        {
+            if (!isDamage)
+            {
+                Bullet enemyBullet = other.GetComponent<Bullet>();
+                health -= enemyBullet.damage;
+
+                StartCoroutine(OnDamage());
+            }
+        }
+    }
+
+    IEnumerator OnDamage()
+    {
+        isDamage = true;
+        foreach(MeshRenderer mesh in meshs)
+        {
+            mesh.material.color = Color.yellow;
+        }
+        
+        yield return new WaitForSeconds(1f);
+
+        isDamage = false;
+        foreach (MeshRenderer mesh in meshs)
+        {
+            mesh.material.color = Color.white;
+        }
+
     }
 
     void OnTriggerStay(Collider other)
