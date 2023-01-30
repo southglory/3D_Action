@@ -5,11 +5,13 @@ using UnityEngine;
 public class Orbit : MonoBehaviour
 {
     public Transform target;
+    public Transform center;
     public float orbitSpeed;
     Vector3 offSet;
 
     void Start()
     {
+        center.position = target.position;
         offSet = transform.position - target.position;
     }
 

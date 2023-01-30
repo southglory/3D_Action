@@ -26,7 +26,7 @@ public class Enemy : MonoBehaviour
             curHealth -= weapon.damage;
             Vector3 reactVec = transform.position- other.transform.position;
 
-            StartCoroutine(OnDamage(reactVec));
+            StartCoroutine(OnDamage(reactVec, false));
 
             Debug.Log("Melee : " + curHealth);
         }
@@ -37,19 +37,35 @@ public class Enemy : MonoBehaviour
             Vector3 reactVec = transform.position - other.transform.position;
             Destroy(other.gameObject);
 
-            StartCoroutine(OnDamage(reactVec));
+            StartCoroutine(OnDamage(reactVec, false));
 
             Debug.Log($"Range : {curHealth}");
         }
     }
 
-    IEnumerator OnDamage(Vector3 reactVec)
+    public void HitByGrenade(Vector3 explosionPos)
+    {
+        curHealth -= 100;
+        Vector3 reactVec = transform.position - explosionPos;
+        StartCoroutine(OnDamage(reactVec, true));
+    }
+
+    IEnumerator OnDamage(Vector3 reactVec, bool isGrenade)
     {
         mat.color = new Color(1f, 0.5f, 0f, 1f); // ÁÖÈ²»ö
 
         reactVec = reactVec.normalized;
         reactVec += Vector3.up;
-        rigid.AddForce(reactVec * 1, ForceMode.Impulse); // ³Ë¹é
+        if (isGrenade)
+        {
+            rigid.AddForce(reactVec * 5, ForceMode.Impulse); // ³Ë¹é
+            rigid.AddTorque(reactVec * 15, ForceMode.Impulse);
+        }
+        else
+        {
+            rigid.AddForce(reactVec * 1, ForceMode.Impulse); // ³Ë¹é
+        }
+        
         yield return new WaitForSeconds(0.2f);
 
 
