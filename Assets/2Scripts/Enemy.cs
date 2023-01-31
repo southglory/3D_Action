@@ -5,8 +5,8 @@ using UnityEngine.AI;
 
 public class Enemy : MonoBehaviour
 {
-    [Tooltip("A: 일반형, B: 돌격형")]
-    public enum Type { A, B, C };
+    [Tooltip("A: 일반형, B: 돌격형, C: 원거리형, D: 보스")]
+    public enum Type { A, B, C, D };
     public Type enemyType;
     public int maxHealth;
     public int curHealth;
@@ -15,22 +15,24 @@ public class Enemy : MonoBehaviour
     public GameObject bullet;
     public bool isChase;
     public bool isAttack;
+    public bool isDead;
 
-    Rigidbody rigid;
-    BoxCollider boxCollider;
-    Material mat;
-    NavMeshAgent nav;
-    Animator anim;
+    protected Rigidbody rigid;
+    protected BoxCollider boxCollider;
+    protected MeshRenderer[] meshs;
+    protected NavMeshAgent nav;
+    protected Animator anim;
 
     void Awake()
     {
         rigid = GetComponent<Rigidbody>();
         boxCollider = GetComponent<BoxCollider>();
-        mat = GetComponentInChildren<MeshRenderer>().material;
+        meshs = GetComponentsInChildren<MeshRenderer>();
         nav = GetComponent<NavMeshAgent>();
         anim = GetComponentInChildren<Animator>();
 
-        Invoke("ChaseStart", 2); // 2초 뒤에 실행.
+        if (enemyType != Type.D)
+            Invoke("ChaseStart", 2); // 2초 뒤에 실행.
     }
 
     void ChaseStart()
@@ -41,7 +43,7 @@ public class Enemy : MonoBehaviour
 
     void Update()
     {
-        if (nav.enabled)
+        if (nav.enabled && enemyType != Type.D)
         {
             nav.SetDestination(target.position);
             nav.isStopped = !isChase;
@@ -61,29 +63,34 @@ public class Enemy : MonoBehaviour
 
     void Targeting()
     {
-        float targetRadius = 0;
-        float targetRange = 0;
-
-        switch (enemyType)
+        if (!isDead && enemyType != Type.D)
         {
-            case Type.A:
-                targetRadius = 1.5f;
-                targetRange = 3f;
-                break;
-            case Type.B:
-                targetRadius = 1f;
-                targetRange = 12f;
-                break;
-            case Type.C:
-                targetRadius = 0.5f;
-                targetRange = 25f;
-                break;
-        }
+            float targetRadius = 0;
+            float targetRange = 0;
 
-        RaycastHit[] rayHits = Physics.SphereCastAll(transform.position, targetRadius, transform.forward, targetRange, LayerMask.GetMask("Player"));
-        if(rayHits.Length > 0 && !isAttack) {
-            StartCoroutine(Attack());
+            switch (enemyType)
+            {
+                case Type.A:
+                    targetRadius = 1.5f;
+                    targetRange = 3f;
+                    break;
+                case Type.B:
+                    targetRadius = 1f;
+                    targetRange = 12f;
+                    break;
+                case Type.C:
+                    targetRadius = 0.5f;
+                    targetRange = 25f;
+                    break;
+            }
+
+            RaycastHit[] rayHits = Physics.SphereCastAll(transform.position, targetRadius, transform.forward, targetRange, LayerMask.GetMask("Player"));
+            if (rayHits.Length > 0 && !isAttack)
+            {
+                StartCoroutine(Attack());
+            }
         }
+        
     }
 
     IEnumerator Attack()
@@ -172,7 +179,8 @@ public class Enemy : MonoBehaviour
 
     IEnumerator OnDamage(Vector3 reactVec, bool isGrenade)
     {
-        mat.color = new Color(1f, 0.5f, 0f, 1f); // 피격, 주황색
+        foreach(MeshRenderer mesh in meshs)
+            mesh.material.color = new Color(1f, 0.5f, 0f, 1f); // 피격, 주황색
 
         reactVec = reactVec.normalized;
         reactVec += Vector3.up;
@@ -188,25 +196,26 @@ public class Enemy : MonoBehaviour
             rigid.AddForce(reactVec * 5, ForceMode.Impulse); // 넉백
         }
         
-        yield return new WaitForSeconds(0.2f);
-        
-
         if (curHealth > 0)
         {
-            mat.color = new Color(1f, 1f, 1f, 1f); //원래대로
+            yield return new WaitForSeconds(0.2f);
+            foreach (MeshRenderer mesh in meshs)
+                mesh.material.color = new Color(1f, 1f, 1f, 1f); //원래대로
             nav.enabled = true;
             isChase = true;
         }
         else //죽음.
         {
-            mat.color = Color.gray; // Dead 회색
+            foreach (MeshRenderer mesh in meshs)
+                mesh.material.color = Color.gray; // Dead 회색
             gameObject.layer = 14;
-            nav.enabled = false;
+            isDead = true;
             isChase = false;
-
+            nav.enabled = false;
             anim.SetTrigger("doDie");
 
-            Destroy(gameObject, 4);
+            if(enemyType != Type.D) // 보스는 스테이지 끝이므로 죽어도 사라지지 않음.
+                Destroy(gameObject, 4);
         }
     }
 }

@@ -354,7 +354,8 @@ public class Player : MonoBehaviour
                 Crash enemyCrash = other.GetComponent<Crash>();
                 health -= enemyCrash.damage;
 
-                StartCoroutine(OnDamage());
+                bool isBossCrask = other.name == "Boss Melee Area";
+                StartCoroutine(OnDamage(isBossCrask));
             }
         }
         else if (other.tag == "EnemyBullet")
@@ -364,19 +365,23 @@ public class Player : MonoBehaviour
                 Bullet enemyBullet = other.GetComponent<Bullet>();
                 health -= enemyBullet.damage;
 
-                StartCoroutine(OnDamage());
+                bool isBossCrask = false;
+                StartCoroutine(OnDamage(isBossCrask));
             }
         }
     }
 
-    IEnumerator OnDamage()
+    IEnumerator OnDamage(bool isBossAck)
     {
         isDamage = true;
         foreach(MeshRenderer mesh in meshs)
         {
             mesh.material.color = Color.yellow;
         }
-        
+
+        if (isBossAck)
+            rigid.AddForce(transform.forward * -25, ForceMode.Impulse);
+
         yield return new WaitForSeconds(1f);
 
         isDamage = false;
@@ -385,6 +390,8 @@ public class Player : MonoBehaviour
             mesh.material.color = Color.white;
         }
 
+        if (isBossAck)
+            rigid.velocity = Vector3.zero;
     }
 
     void OnTriggerStay(Collider other)
