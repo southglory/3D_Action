@@ -59,13 +59,4 @@ public class FrameCounter : MonoBehaviour
             GUI.Label(rect, text, style);
         }
     }
-
-
-
-
-
-
-
-
-
 }
